@@ -4,14 +4,14 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "client-core/ClientParser.h"
+#include "client-core/Client.h"
 
 int main(int argc, char **argv) {
     HttpRequest request;
     ClientParser parser(argc, argv, request);
     request = parser.getRequest();
-    printf("-------------------\n");
-    printf("%s\n", request.toStr().c_str());
-    printf("-------------------\n");
-    
+    Client client;
+    client.run();
+
 }
 

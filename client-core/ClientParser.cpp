@@ -92,10 +92,11 @@ HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, Htt
 
                         return request;
 
-                    } else if (vect.at(5) == "update" && isValidNumber(vect.at(7), 0, INT32_MAX)) {
+                    } else if (vect.at(5) == "update" && vect.size() > 8 && isValidNumber(vect.at(7), 0, INT32_MAX)) {
                         printf("item update\n");
                         request.setHttpMethod(HttpMethod::PUT);
                         request.setEndpoint(createUrl({"board", vect.at(6), vect.at(7)}));
+                        request.setContent(vect.at(8));
                         return request;
                     }
                 }
