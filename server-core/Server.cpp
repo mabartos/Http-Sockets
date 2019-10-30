@@ -12,6 +12,7 @@
 #include "../common/Errors.h"
 #include "Server.h"
 #include "../common/HttpRequest.h"
+#include "../common/HttpResponse.h"
 
 #define BUFFER_SIZE 1024
 
@@ -68,13 +69,76 @@ void Server::run() {
             Errors::error(EXIT_FAILURE, "Cannot read from socket!!");
         }
         HttpRequest request(buffer);
+        HttpResponse response;
+        response = manageRequest(request, response);
 
-        printf("%s\n", request.getContent().c_str());
-        string message("sdd\n");
-        send(newSocketFd, message.c_str(), sizeof(message.c_str()), 0);
+        printf("REQ: %s\n", request.toStr().c_str());
+        printf("RESP: %s\n", response.toStr().c_str());
+
+        //TODO sent only one word
+        send(newSocketFd, response.toStr().c_str(), sizeof(response.toStr().c_str()), 0);
         close(newSocketFd);
-
     }
+}
 
-
+//TODO verify find functions
+HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response) {
+    int pos = 0;
+    switch (request.getMethod()) {
+        case GET:
+            if (request.getEndpoint() == "boards") {
+                string namesBoards = boards.getNamesAllBoards();
+                if (!namesBoards.empty()) {
+                    response.setStatusCode(200);
+                    response.setStatus("OK");
+                    response.setContent(namesBoards);
+                    break;
+                }
+            } else if ((pos = request.getEndpoint().find("board/") != string::npos)) {
+                string name = request.getEndpoint().erase(0, pos);
+                if (!name.empty() && boards.existsBoard(name)) {
+                    response.setStatusCode(200);
+                    response.setStatus("OK");
+                    response.setContent(boards.getBoard(name).getAllContent());
+                    break;
+                }
+            }
+            response.setStatusCode(404);
+            response.setStatus("Not Found");
+            break;
+        case POST:
+            if ((pos = request.getEndpoint().find("boards/") != string::npos)) {
+                string name = request.getEndpoint().erase(0, pos);
+                if (!name.empty()) {
+                    if (!boards.existsBoard(name)) {
+                        response.setStatusCode(409);
+                        response.setStatus("Conflict");
+                        break;
+                    }
+                    if (boards.createBoard(name)) {
+                        response.setStatusCode(201);
+                        response.setStatus("Created");
+                        break;
+                    }
+                }
+            } else if ((pos = request.getEndpoint().find("board/") != string::npos)) {
+                string name = request.getEndpoint().erase(0, pos);
+                if (!name.empty() && boards.existsBoard(name) && request.getContentLength() > 0) {
+                    boards.getBoard(name).addItem(request.getContent());
+                    response.setStatusCode(201);
+                    response.setStatus("Created");
+                    break;
+                }
+            }
+            response.setStatusCode(404);
+            response.setStatus("Not Found");
+            break;
+        case PUT:
+            break;
+        case DELETE:
+            break;
+        case NONE:
+            break;
+    }
+    return response;
 }

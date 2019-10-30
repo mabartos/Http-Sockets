@@ -47,6 +47,7 @@ void Client::run() {
     send(sock, request.c_str(), request.size(), 0);
     valRead = read(sock, buffer, 1024);
     printf("%s\n", buffer);
+    close(sock);
 }
 
 string Client::getHost() {

@@ -8,6 +8,8 @@
 #include "vector"
 #include "string"
 #include "board/Boards.h"
+#include "../common/HttpRequest.h"
+#include "../common/HttpResponse.h"
 
 using namespace std;
 
@@ -23,6 +25,8 @@ public:
     ~Server() = default;
 
     void run();
+
+    HttpResponse &manageRequest(HttpRequest &request, HttpResponse &response);
 };
 
 

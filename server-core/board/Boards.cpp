@@ -31,6 +31,7 @@ vector<NoticeBoard> Boards::getAllBoards() {
     return boards;
 }
 
+
 NoticeBoard &Boards::getBoard(const string &name) {
     for (auto &board:boards) {
         if (board.getName() == name)
@@ -49,6 +50,22 @@ bool Boards::isValidBoardName(const string &name) {
 
 int Boards::getCount() {
     return boards.size();
+}
+
+string Boards::getNamesAllBoards() {
+    string result;
+    for (auto &board:boards) {
+        result.append(board.getName()).append("\r\n");
+    }
+    return result;
+}
+
+bool Boards::existsBoard(const string &name) {
+    for (auto &board:boards) {
+        if (board.getName() == name)
+            return true;
+    }
+    return false;
 }
 
 

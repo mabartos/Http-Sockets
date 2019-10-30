@@ -29,7 +29,11 @@ public:
 
     NoticeBoard &getBoard(const string &name);
 
+    bool existsBoard(const string &name);
+
     static bool isValidBoardName(const string &name);
+
+    string getNamesAllBoards();
 
     int getCount();
 };
