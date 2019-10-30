@@ -36,3 +36,9 @@ bool Parser::isPortSetUp() {
 int Parser::getPort() {
     return this->serverPort;
 }
+
+bool Parser::isNumber(const string &item) {
+    char *p;
+    strtol(item.c_str(), &p, 10);
+    return *p == 0;
+}

@@ -33,6 +33,8 @@ public:
     int getPort();
 
     virtual void parseArgs() = 0;
+
+    static bool isNumber(string const &item);
 };
 
 

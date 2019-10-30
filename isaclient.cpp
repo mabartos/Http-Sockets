@@ -9,8 +9,7 @@
 int main(int argc, char **argv) {
     HttpRequest request;
     ClientParser parser(argc, argv, request);
-    request = parser.getRequest();
-    Client client;
+    Client client(parser.getHost(), parser.getPort(), parser.getRequest().toStr());
     client.run();
 
 }

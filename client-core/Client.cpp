@@ -1,42 +1,58 @@
 //
 // Created by mabartos on 10/29/19.
 //
+#include <utility>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string>
+#include "../common/Errors.h"
 #include "Client.h"
 
 using namespace std;
 
+Client::Client(string host, int port, string request) : host(move(host)), port(port), request(move(request)) {
+}
+
 void Client::run() {
-    int sock = 0, valread;
-    struct sockaddr_in serv_addr;
+    int sock = 0, valRead;
+    struct sockaddr_in address;
+
     string hello = "Hello from client";
     char buffer[1024] = {0};
+
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
-        return;
+        Errors::error(EXIT_FAILURE, "Socket creation !!");
     }
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(8289);
+    // IPv4
+    address.sin_family = AF_INET;
+    // Port
+    address.sin_port = htons(port);
 
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
-        printf("\nInvalid address/ Address not supported \n");
-        return;
+    if (host == "localhost") {
+        host = "127.0.0.1";
     }
 
-    if (connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return;
+    // Convert IPv4 addresses from text to binary form
+    if (inet_pton(AF_INET, host.c_str(), &address.sin_addr) <= 0) {
+        Errors::error(EXIT_FAILURE, "Invalid Address !!");
     }
-    
-    send(sock, hello.c_str(), hello.size(), 0);
-    printf("Hello message sent\n");
-    valread = read(sock, buffer, 1024);
+
+    if (connect(sock, (struct sockaddr *) &address, sizeof(address)) < 0) {
+        Errors::error(EXIT_FAILURE, "Connection failed");
+    }
+
+    send(sock, request.c_str(), request.size(), 0);
+    valRead = read(sock, buffer, 1024);
     printf("%s\n", buffer);
-    return;
+}
+
+string Client::getHost() {
+    return host;
+}
+
+int Client::getPort() {
+    return port;
 }

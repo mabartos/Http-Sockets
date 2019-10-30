@@ -13,21 +13,10 @@ enum HttpMethods {
     GET,
     POST,
     PUT,
-    DELETE
+    DELETE,
+    NONE
 };
 
 typedef enum HttpMethods HttpMethod;
-
-/*
-
-class HttpMethod {
-public:
-    static const string GET;
-    static const string POST;
-    static const string PUT;
-    static const string DELETE;
-};
-
- */
 
 #endif //ISA_HTTPMETHOD_H

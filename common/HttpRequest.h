@@ -6,6 +6,9 @@
 #define ISA_HTTPREQUEST_H
 
 #include "string"
+#include <regex>
+#include <sstream>
+#include <iostream>
 #include "HttpMethod.h"
 
 using namespace std;
@@ -16,12 +19,15 @@ private:
     unsigned int port = 0;
     string endpoint = "";
     string content = "";
-    HttpMethod method;
+    HttpMethod method = HttpMethod::NONE;
     string httpVersion = "HTTP/1.1";
     string contentType = "text/plain";
+    int contentLength = 0;
 
 public:
-    HttpRequest();
+    HttpRequest() = default;
+
+    explicit HttpRequest(const char *requestString);
 
     ~HttpRequest() = default;
 
@@ -33,6 +39,8 @@ public:
 
     void setHttpMethod(HttpMethod method);
 
+    void setHttpMethod(const string &reqMethod);
+
     string getHost();
 
     unsigned int getPort();
@@ -43,11 +51,15 @@ public:
 
     void setContent(const string &con);
 
+    int getContentLength();
+
+    void setContentLength(int length);
+
+    void setContentLength(const string &length);
+
     HttpMethod getMethod();
 
     string toStr();
-
-
 };
 
 
