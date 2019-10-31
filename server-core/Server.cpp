@@ -148,8 +148,11 @@ HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response
                         break;
                     }
                     int id = strtol(idString.c_str(), nullptr, 10);
-                    if (boards.getBoard(name).changeItemContent(id, request.getContent()))
+                    if (boards.getBoard(name).changeItemContent(id, request.getContent())) {
+                        response.setStatusCode(200);
+                        response.setStatus("OK");
                         break;
+                    }
                 }
             }
             response.setStatusCode(404);
@@ -170,8 +173,11 @@ HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response
 
                     if (boards.existsBoard(name) && Parser::isNumber(idString)) {
                         int id = strtol(idString.c_str(), nullptr, 10);
-                        if (boards.getBoard(name).removeItem(id))
+                        if (boards.getBoard(name).removeItem(id)) {
+                            response.setStatusCode(200);
+                            response.setStatus("OK");
                             break;
+                        }
                     }
                 }
             }

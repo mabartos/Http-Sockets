@@ -15,6 +15,8 @@ private:
     int port;
     string request;
 
+    void printResponse(char *buffer);
+
 public:
     Client(string host, int port, string request);
 
