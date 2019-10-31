@@ -1,25 +1,22 @@
-#include <utility>
-
-#include <utility>
-
 //
 // Created by mabartos on 10/29/19.
 //
 
 #include "NoticeBoard.h"
+#include <utility>
 
 NoticeBoard::NoticeBoard(string name) : name(move(name)) {
 }
 
 string NoticeBoard::getName() {
-    return std::__cxx11::string();
+    return this->name;
 }
 
 string NoticeBoard::getAllContent() {
     string result;
     result.append("[ " + getName() + " ]\n");
     for (int i = 0; i < items.size(); i++) {
-        result.append("%d. ", i + 1);
+        result.append(to_string(i + 1)).append(". ");
         result.append(items.at(i));
         result.append("\n");
     }
@@ -39,8 +36,8 @@ bool NoticeBoard::changeItemContent(int id, const string &content) {
 }
 
 bool NoticeBoard::removeItem(int id) {
-    if (id > 0 && id < items.size()) {
-        items.erase(items.begin() + id);
+    if (id > 0 && id <= items.size()) {
+        items.erase(items.begin() + id-1);
         return true;
     }
     return false;

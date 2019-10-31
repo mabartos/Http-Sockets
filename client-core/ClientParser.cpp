@@ -22,7 +22,7 @@ ClientParser::ClientParser(int argc, char **argv, HttpRequest &req) : Parser(arg
 
 void ClientParser::parseArgs() {
     if (this->argc == 1)
-        Errors::error(-1, "Wrong count of parameters!!");
+        Errors::error(EXIT_FAILURE, "Wrong count of parameters!!");
 
     vector<string> vect;
     HttpRequest tmpRequest;
@@ -36,7 +36,7 @@ void ClientParser::parseArgs() {
     if (vect.size() == 1 && vect.at(0) == "-h") {
         printHelp();
     } else if (vect.size() > 1 && vect.size() < 5) {
-        Errors::error(-1, "Invalid Parameters");
+        Errors::error(EXIT_FAILURE, "Invalid Parameters");
     }
 
     this->clientRequest = createRequestFromVect(vect, tmpRequest);
@@ -51,7 +51,6 @@ HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, Htt
             this->serverPort = getValidPort(vect.at(3));
             request.setPort(this->serverPort);
             if (vect.at(4) == "boards") {
-                printf("boards get\n");
                 request.setHttpMethod(HttpMethod::GET);
                 request.setEndpoint(createUrl({"boards"}));
                 //TODO BOARDS GET
@@ -59,19 +58,16 @@ HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, Htt
             } else if (vect.size() > 6) {
                 if (vect.at(4) == "board") {
                     if (vect.at(5) == "add") {
-                        printf("boards add\n");
                         request.setHttpMethod(HttpMethod::POST);
                         request.setEndpoint(createUrl({"boards", vect.at(6)}));
                         return request;
 
                     } else if (vect.at(5) == "delete") {
-                        printf("boards del\n");
                         request.setHttpMethod(HttpMethod::DELETE);
                         request.setEndpoint(createUrl({"boards", vect.at(6)}));
                         return request;
 
                     } else if (vect.at(5) == "list") {
-                        printf("boards list\n");
                         request.setHttpMethod(HttpMethod::GET);
                         request.setEndpoint(createUrl({"board", vect.at(6)}));
                         return request;
@@ -79,21 +75,18 @@ HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, Htt
                     }
                 } else if (vect.at(4) == "item" && vect.size() > 7) {
                     if (vect.at(5) == "add") {
-                        printf("item add\n");
                         request.setHttpMethod(HttpMethod::POST);
                         request.setEndpoint(createUrl({"board", vect.at(6)}));
                         request.setContent(vect.at(7));
                         return request;
 
                     } else if (vect.at(5) == "delete" && isValidNumber(vect.at(7), 0, INT32_MAX)) {
-                        printf("item del\n");
                         request.setHttpMethod(HttpMethod::DELETE);
                         request.setEndpoint(createUrl({"board", vect.at(6), vect.at(7)}));
 
                         return request;
 
                     } else if (vect.at(5) == "update" && vect.size() > 8 && isValidNumber(vect.at(7), 0, INT32_MAX)) {
-                        printf("item update\n");
                         request.setHttpMethod(HttpMethod::PUT);
                         request.setEndpoint(createUrl({"board", vect.at(6), vect.at(7)}));
                         request.setContent(vect.at(8));
@@ -103,7 +96,7 @@ HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, Htt
             }
         }
     }
-    Errors::error(-1, "WRONG ARGUMENTS!!");
+    Errors::error(EXIT_FAILURE, "WRONG ARGUMENTS!!");
 }
 
 string ClientParser::getHost() {

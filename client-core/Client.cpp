@@ -10,6 +10,8 @@
 #include "../common/Errors.h"
 #include "Client.h"
 
+#define BUFFER_SIZE 1024
+
 using namespace std;
 
 Client::Client(string host, int port, string request) : host(move(host)), port(port), request(move(request)) {
@@ -20,7 +22,7 @@ void Client::run() {
     struct sockaddr_in address;
 
     string hello = "Hello from client";
-    char buffer[1024] = {0};
+    char buffer[BUFFER_SIZE] = {0};
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         Errors::error(EXIT_FAILURE, "Socket creation !!");
@@ -45,7 +47,9 @@ void Client::run() {
     }
 
     send(sock, request.c_str(), request.size(), 0);
-    valRead = read(sock, buffer, 1024);
+    valRead = read(sock, buffer, BUFFER_SIZE);
+
+    printf("%d\n", valRead);
     printf("%s\n", buffer);
     close(sock);
 }

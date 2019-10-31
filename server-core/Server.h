@@ -19,6 +19,8 @@ private:
     int port;
     Boards boards;
 
+    vector<string> getUrl(const string &endpoint);
+
 public:
     Server(int port);
 

@@ -16,7 +16,7 @@ ServerParser::ServerParser(int argc, char **argv) : Parser(argc, argv) {
 
 void ServerParser::parseArgs() {
     if (this->argc == 1 || this->argc > 3)
-        Errors::error(-1, "Wrong count of parameters!!");
+        Errors::error(EXIT_FAILURE, "Wrong count of parameters!!");
 
     vector<string> vect;
     for (int i = 1; i < this->argc; i++) {
@@ -29,7 +29,7 @@ void ServerParser::parseArgs() {
     } else if (vect.size() == 2 && vect.at(0) == "-p") {
         this->serverPort = getValidPort(vect.at(1));
     } else {
-        Errors::error(-1, "Invalid Parameters");
+        Errors::error(EXIT_FAILURE, "Invalid Parameters");
     }
 }
 

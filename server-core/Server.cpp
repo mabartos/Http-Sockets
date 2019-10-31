@@ -13,6 +13,7 @@
 #include "Server.h"
 #include "../common/HttpRequest.h"
 #include "../common/HttpResponse.h"
+#include "../common/Parser.h"
 
 #define BUFFER_SIZE 1024
 
@@ -72,21 +73,19 @@ void Server::run() {
         HttpResponse response;
         response = manageRequest(request, response);
 
-        printf("REQ: %s\n", request.toStr().c_str());
-        printf("RESP: %s\n", response.toStr().c_str());
-
-        //TODO sent only one word
-        send(newSocketFd, response.toStr().c_str(), sizeof(response.toStr().c_str()), 0);
+        send(newSocketFd, response.toStr().data(), response.toStr().size(), 0);
         close(newSocketFd);
     }
 }
 
 //TODO verify find functions
 HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response) {
-    int pos = 0;
+    vector<string> endpoints = getUrl(request.getEndpoint());
+    int endCount = endpoints.size();
+
     switch (request.getMethod()) {
         case GET:
-            if (request.getEndpoint() == "boards") {
+            if (endCount > 0 && endpoints.at(0) == "boards") {
                 string namesBoards = boards.getNamesAllBoards();
                 if (!namesBoards.empty()) {
                     response.setStatusCode(200);
@@ -94,8 +93,8 @@ HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response
                     response.setContent(namesBoards);
                     break;
                 }
-            } else if ((pos = request.getEndpoint().find("board/") != string::npos)) {
-                string name = request.getEndpoint().erase(0, pos);
+            } else if (endCount > 1 && endpoints.at(0) == "board") {
+                string name = endpoints.at(1);
                 if (!name.empty() && boards.existsBoard(name)) {
                     response.setStatusCode(200);
                     response.setStatus("OK");
@@ -107,38 +106,98 @@ HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response
             response.setStatus("Not Found");
             break;
         case POST:
-            if ((pos = request.getEndpoint().find("boards/") != string::npos)) {
-                string name = request.getEndpoint().erase(0, pos);
-                if (!name.empty()) {
-                    if (!boards.existsBoard(name)) {
+            if (endCount > 1) {
+                if (endpoints.at(0) == "boards") {
+                    string name = endpoints.at(1);
+                    if (boards.existsBoard(name)) {
                         response.setStatusCode(409);
                         response.setStatus("Conflict");
                         break;
-                    }
-                    if (boards.createBoard(name)) {
+                    } else if (boards.createBoard(name)) {
                         response.setStatusCode(201);
                         response.setStatus("Created");
                         break;
                     }
-                }
-            } else if ((pos = request.getEndpoint().find("board/") != string::npos)) {
-                string name = request.getEndpoint().erase(0, pos);
-                if (!name.empty() && boards.existsBoard(name) && request.getContentLength() > 0) {
-                    boards.getBoard(name).addItem(request.getContent());
-                    response.setStatusCode(201);
-                    response.setStatus("Created");
-                    break;
+                } else if (endpoints.at(0) == "board") {
+                    string name = endpoints.at(1);
+                    if (boards.existsBoard(name)) {
+                        if (request.getContentLength() == 0) {
+                            response.setStatusCode(400);
+                            response.setStatus("Bad Request");
+                            break;
+                        }
+                        boards.getBoard(name).addItem(request.getContent());
+                        response.setStatusCode(201);
+                        response.setStatus("Created");
+                        break;
+                    }
                 }
             }
             response.setStatusCode(404);
             response.setStatus("Not Found");
             break;
         case PUT:
+            if (endCount > 2 && endpoints.at(0) == "board") {
+                string name = endpoints.at(1);
+                string idString = endpoints.at(2);
+
+                if (boards.existsBoard(name) && Parser::isNumber(idString)) {
+                    if (request.getContentLength() == 0) {
+                        response.setStatusCode(400);
+                        response.setStatus("Bad Request");
+                        break;
+                    }
+                    int id = strtol(idString.c_str(), nullptr, 10);
+                    if (boards.getBoard(name).changeItemContent(id, request.getContent()))
+                        break;
+                }
+            }
+            response.setStatusCode(404);
+            response.setStatus("Not Found");
             break;
         case DELETE:
+            if (endCount > 1) {
+                if (endpoints.at(0) == "boards") {
+                    string name = endpoints.at(1);
+                    if (boards.existsBoard(name) && boards.deleteBoard(name)) {
+                        response.setStatusCode(200);
+                        response.setStatus("OK");
+                        break;
+                    }
+                } else if (endCount > 2 && endpoints.at(0) == "board") {
+                    string name = endpoints.at(1);
+                    string idString = endpoints.at(2);
+
+                    if (boards.existsBoard(name) && Parser::isNumber(idString)) {
+                        int id = strtol(idString.c_str(), nullptr, 10);
+                        if (boards.getBoard(name).removeItem(id))
+                            break;
+                    }
+                }
+            }
+            response.setStatusCode(404);
+            response.setStatus("Not Found");
             break;
         case NONE:
+            response.setStatusCode(404);
+            response.setStatus("Not Found");
             break;
     }
     return response;
+}
+
+vector<string> Server::getUrl(const string &endpoint) {
+    vector<string> result;
+    string end = endpoint;
+    if (!end.empty()) {
+        size_t pos = 0;
+
+        while ((pos = end.find('/')) != std::string::npos) {
+            string token = end.substr(0, pos);
+            result.push_back(token);
+            end.erase(0, pos + 1);
+        }
+        result.push_back(end);
+    }
+    return result;
 }

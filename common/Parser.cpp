@@ -25,8 +25,8 @@ int Parser::getValidPort(string const &port) {
     if (isValidPort(port)) {
         return stoi(port);
     } else
-        Errors::error(-1, "Invalid Port!");
-    return -1;
+        Errors::error(EXIT_FAILURE, "Invalid Port!");
+    return EXIT_FAILURE;
 }
 
 bool Parser::isPortSetUp() {
