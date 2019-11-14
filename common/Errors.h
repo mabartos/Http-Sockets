@@ -9,10 +9,22 @@
 
 using namespace std;
 
+/**
+ * Helper class for proper exit of system
+ */
 class Errors {
 public:
+    /**
+     * Static error method, which exit program with statusCode and message
+     * @param statusCode Status of exit
+     * @param message   Message, which will be showed before exiting program
+     */
     static void error(int statusCode, const string &message);
 
+    /**
+     * Static error method, which exit program with statusCode
+     * @param statusCode Status of exit
+     */
     static void error(int statusCode);
 
 private:

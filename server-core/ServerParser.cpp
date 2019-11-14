@@ -24,6 +24,7 @@ void ServerParser::parseArgs() {
     if (this->argc == 1 || this->argc > 3)
         Errors::error(EXIT_FAILURE, "Wrong count of parameters!!");
 
+    // Add arguments to vector
     vector<string> vect;
     for (int i = 1; i < this->argc; i++) {
         string item(this->argv[i]);

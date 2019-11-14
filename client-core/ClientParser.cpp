@@ -9,7 +9,6 @@
 #include "../common/Errors.h"
 #include <bits/unique_ptr.h>
 
-
 using namespace std;
 
 void ClientParser::printHelp() {
@@ -46,7 +45,7 @@ void ClientParser::parseArgs() {
     vector<string> vect;
     HttpRequest tmpRequest;
 
-
+    // System args are added to vector
     for (int i = 1; i < this->argc; i++) {
         string item(this->argv[i]);
         vect.push_back(item);
@@ -59,11 +58,12 @@ void ClientParser::parseArgs() {
         Errors::error(EXIT_FAILURE, "Invalid Parameters");
     }
 
+    // From args is generated request
     this->clientRequest = createRequestFromVect(vect, tmpRequest);
-
 }
 
 HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, HttpRequest &request) {
+    //Parsing arguments
     if (vect.at(0) == "-H" && vect.size() > 1) {
         this->host = vect.at(1);
         request.setHost(vect.at(1));

@@ -9,6 +9,9 @@
 
 using namespace std;
 
+/**
+ * Http Methods
+ */
 enum HttpMethods {
     GET,
     POST,

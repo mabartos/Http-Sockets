@@ -13,6 +13,9 @@
 
 using namespace std;
 
+/**
+ * Main class for Server side of app
+ */
 class Server {
 
 private:
@@ -22,14 +25,26 @@ private:
     vector<string> getUrl(const string &endpoint);
 
 public:
+    /**
+     * Constructor for server-side
+     * @param port Port, where server listen
+     */
     explicit Server(int port);
 
     ~Server() = default;
 
+    /**
+     * Start the server
+     */
     void run();
 
+    /**
+     * Execute request and return Response
+     * @param request
+     * @param response
+     * @return Generated Response from received request
+     */
     HttpResponse &manageRequest(HttpRequest &request, HttpResponse &response);
 };
-
 
 #endif //ISA_SERVER_H

@@ -56,7 +56,6 @@ void Server::run() {
         Errors::error(EXIT_FAILURE, "Server listen !!");
     }
 
-
     while (true) {
         if ((newSocketFd = accept(sockFd, (struct sockaddr *) &address, (socklen_t *) &socketLength)) < 0) {
             Errors::error(EXIT_FAILURE, "Server Accept!!");
@@ -78,7 +77,6 @@ void Server::run() {
     }
 }
 
-//TODO verify find functions
 HttpResponse &Server::manageRequest(HttpRequest &request, HttpResponse &response) {
     vector<string> endpoints = getUrl(request.getEndpoint());
     int endCount = endpoints.size();

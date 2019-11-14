@@ -19,19 +19,20 @@ HttpRequest::HttpRequest(const char *requestString) {
 
     while (getline(text, line)) {
         if (init) {
+            // Regex for getting endpoint
             regex rgxHeader("(GET|POST|PUT|DELETE) /(.+) HTTP/1.1");
             smatch matches;
             if (regex_search(line, matches, rgxHeader)) {
                 setHttpMethod(matches[1].str());
                 setEndpoint(matches[2].str());
             } else {
-                // TODO bad request!!
-                printf("bad request!!\n");
+                Errors::error(EXIT_FAILURE, "Bad request!!");
             }
             init = false;
             continue;
         }
 
+        // Regex for getting properties of Http header
         regex rgxParams("(.*): (.*)");
         smatch matches;
         if (regex_search(line, matches, rgxParams)) {
@@ -39,6 +40,7 @@ HttpRequest::HttpRequest(const char *requestString) {
                 string key = matches[1].str();
                 string value = matches[2].str();
 
+                // Manage the props
                 if (key == "Host") {
                     setHost(value);
                 } else if (key == "Content-Type") {
@@ -48,14 +50,14 @@ HttpRequest::HttpRequest(const char *requestString) {
                 }
                 continue;
             } else {
-                // TODO bad request!!
-                printf("bad request!!\n");
+                Errors::error(EXIT_FAILURE, "Bad request!!");
             }
         }
 
         if (getContentLength() == 0)
             break;
 
+        //If content is present
         regex rgxContent("(.+)");
         smatch contentMatches;
         if (regex_search(line, contentMatches, rgxContent)) {
@@ -101,8 +103,8 @@ void HttpRequest::setHttpMethod(const string &item) {
         this->method = HttpMethod::PUT;
     else if (item == "DELETE")
         this->method = HttpMethod::DELETE;
-    else //TODO MEthod not allowed
-        Errors::error(EXIT_FAILURE);
+    else
+        Errors::error(EXIT_FAILURE, "Method not allowed");
 }
 
 void HttpRequest::setHost(string reqHost) {

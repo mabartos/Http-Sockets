@@ -12,12 +12,14 @@ int Parser::isValidNumber(string const &port, int minNumber, int maxNumber) {
     char *res;
     long number = strtol(port.c_str(), &res, 10);
     if (*res == 0) {
+        // Boundaries for 'port'
         return (number >= minNumber && number <= maxNumber);
     }
     return false;
 }
 
 bool Parser::isValidPort(string const &port) {
+    // Defined boundaries for port
     return isValidNumber(port, 1, 65535);
 }
 

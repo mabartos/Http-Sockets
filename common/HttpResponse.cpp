@@ -4,9 +4,13 @@
 
 #include "HttpResponse.h"
 
+/**
+ * Parse Response to String
+ */
 string HttpResponse::toStr() {
     string result;
 
+    // Append all items to result string
     result.append(this->httpVersion)
             .append(" ")
             .append(to_string(this->statusCode))

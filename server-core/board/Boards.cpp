@@ -45,7 +45,6 @@ bool Boards::isValidBoardName(const string &name) {
             return false;
     }
     return true;
-
 }
 
 int Boards::getCount() {

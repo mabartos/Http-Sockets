@@ -13,6 +13,9 @@
 
 using namespace std;
 
+/**
+ * Helper class for creating Http Request
+ */
 class HttpRequest {
 private:
     string host = "";

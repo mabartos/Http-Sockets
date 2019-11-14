@@ -13,6 +13,9 @@
 
 using namespace std;
 
+/**
+ * Persist and manage all boards
+ */
 class Boards {
 private:
     vector<NoticeBoard> boards;
@@ -20,7 +23,7 @@ public:
     Boards() = default;
 
     ~Boards() = default;
-
+    
     vector<NoticeBoard> getAllBoards();
 
     bool createBoard(const string &name);

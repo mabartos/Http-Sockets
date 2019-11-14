@@ -10,6 +10,9 @@
 
 using namespace std;
 
+/**
+ * Notice Board
+ */
 class NoticeBoard {
 private:
     string name;

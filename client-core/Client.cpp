@@ -29,6 +29,7 @@ void Client::run() {
 
     char buffer[BUFFER_SIZE] = {0};
 
+    // Create TCP Socket IPv4
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         Errors::error(EXIT_FAILURE, "Socket creation !!");
     }
@@ -51,38 +52,49 @@ void Client::run() {
     hintsHost.ai_flags |= AI_CANONNAME;
 
     if (getaddrinfo((this->host).c_str(), nullptr, &hintsHost, &hostResults) != 0) {
+        close(sock);
         Errors::error(EXIT_FAILURE, "Invalid Host!!");
     }
 
+    // Get IPv4 address from hostname
     if (hostResults != nullptr) {
         struct sockaddr_in *saddr = (struct sockaddr_in *) hostResults->ai_addr;
+        address.sin_addr = saddr->sin_addr;
         host = inet_ntoa(saddr->sin_addr);
+        // Free all available hosts from memory
         freeaddrinfo(hostResults);
     } else {
+        close(sock);
         Errors::error(EXIT_FAILURE, "Cannot find host IP!!");
     }
 
-    // Convert IPv4 addresses from text to binary form
-    if (inet_pton(AF_INET, host.c_str(), &address.sin_addr) <= 0) {
-        Errors::error(EXIT_FAILURE, "Invalid Address !!");
-    }
-
+    // Connect to socket
     if (connect(sock, (struct sockaddr *) &address, sizeof(address)) < 0) {
+        close(sock);
         Errors::error(EXIT_FAILURE, "Connection failed");
     }
 
+    // Content cannot be bigger than BUFFER_SIZE
     if (request.size() >= BUFFER_SIZE) {
+        close(sock);
         Errors::error(EXIT_FAILURE, "Request is too long!!");
     }
 
+    // Send request to socket (server)
     send(sock, request.c_str(), request.size(), 0);
+
+    // Read response from socket (server)
     valRead = read(sock, buffer, BUFFER_SIZE);
 
     if (valRead < 0) {
         close(sock);
         Errors::error(EXIT_FAILURE, "Cannot read from socket!!");
     }
+
+    // Print response to standard outputs
     printResponse(buffer);
+
+    // Close socket
     close(sock);
 }
 
@@ -90,12 +102,15 @@ string Client::getHost() {
     return host;
 }
 
+string Client::getRequest() {
+    return this->request;
+}
+
 int Client::getPort() {
     return port;
 }
 
 void Client::printResponse(char *buffer) {
-
     istringstream stream(buffer);
     string line;
     int i = 0;
@@ -112,13 +127,15 @@ void Client::printResponse(char *buffer) {
             continue;
         }
 
-        regex rgxParams("(.*): (.*)");
+        //Get all header props key:value
+        regex rgxParams("(.+): (.+)");
         smatch matches;
         if (regex_search(line, matches, rgxParams)) {
             if (matches.size() > 2) {
                 string key = matches[1].str();
                 string value = matches[2].str();
 
+                // Parse Headers props
                 if (key == "Content-Length") {
                     containsContent = true;
                 }
@@ -127,16 +144,19 @@ void Client::printResponse(char *buffer) {
             }
         }
 
+        // Get content from Response
         if (containsContent && line == "\r") {
             int j = 0;
             bool nowContent = false;
             while (getline(stream, line)) {
+                // Here is decided, if the content will be parsed
                 if (j == 0) {
                     if (line == "\r")
                         nowContent = true;
                     j++;
                     continue;
                 }
+                // Determine, whether the content is not empty
                 if (nowContent && line != "\r") {
                     while ((pos = line.find('\\')) != std::string::npos) {
                         if (line.at(pos + 1) == 'n') {

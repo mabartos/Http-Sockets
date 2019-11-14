@@ -9,6 +9,9 @@
 
 using namespace std;
 
+/**
+ * Helper class for creating Http Response
+ */
 class HttpResponse {
 private:
     int statusCode;

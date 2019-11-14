@@ -10,11 +10,17 @@
 
 using namespace std;
 
+/**
+ * Parse server arguments
+ */
 class ServerParser : public Parser {
 public:
 
     void printHelp() override;
 
+    /**
+     * Main method for parsing of arguments
+     */
     void parseArgs() override;
 
     ServerParser(int argc, char **argv);
