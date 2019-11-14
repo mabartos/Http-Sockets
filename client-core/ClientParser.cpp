@@ -13,7 +13,26 @@
 using namespace std;
 
 void ClientParser::printHelp() {
-    printf("HELP CLIENT\n");
+    printf("\n******************************************\n");
+    printf("Http Client - Martin Bartos - FIT VUT 3BIT \n");
+    printf("****************************************** \n\n");
+    printf("Run client : \n ./isaserver -H {HOST} -p {PORT} {COMMAND}\n\n");
+    printf("{HOST} domain name, or IP address.\n");
+    printf("{PORT} is port, where the server listen.\n");
+    printf("{COMMAND} might be:\n");
+    printf("-----------------------------------------------------------\n");
+    printf("boards\t\t\t\t\t\t\t\tGET /boards\n"
+           "board add <name>\t\t\t\t\tPOST /boards/<name>\n"
+           "board delete <name>\t\t\t\t\tDELETE /boards/<name>\n"
+           "board list <name>\t\t\t\t\tGET /board/<name>\n"
+           "item add <name> <content>\t\t\tPOST /board/<name>\n"
+           "item delete <name> <id>\t\t\t\tDELETE /board/<name>/<id>\n"
+           "item update <name> <id> <content>\tPUT /board/<name>/<id>\n");
+    printf("-----------------------------------------------------------\n\n");
+    printf("Response Headers will be printed to 'STDERR'\n");
+    printf("Response Body will be printed to 'STDOUT'\n\n");
+    printf("See the server side :\n ./isaserver -h\n");
+    printf("****************************************** \n");
 }
 
 ClientParser::ClientParser(int argc, char **argv, HttpRequest &req) : Parser(argc, argv), clientRequest(req) {
@@ -35,6 +54,7 @@ void ClientParser::parseArgs() {
 
     if (vect.size() == 1 && vect.at(0) == "-h") {
         printHelp();
+        exit(EXIT_SUCCESS);
     } else if (vect.size() > 1 && vect.size() < 5) {
         Errors::error(EXIT_FAILURE, "Invalid Parameters");
     }
@@ -44,7 +64,7 @@ void ClientParser::parseArgs() {
 }
 
 HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, HttpRequest &request) {
-    if (vect.at(0) == "-H") {
+    if (vect.at(0) == "-H" && vect.size() > 1) {
         this->host = vect.at(1);
         request.setHost(vect.at(1));
         if (vect.at(2) == "-p") {
@@ -53,7 +73,6 @@ HttpRequest &ClientParser::createRequestFromVect(const vector<string> &vect, Htt
             if (vect.at(4) == "boards") {
                 request.setHttpMethod(HttpMethod::GET);
                 request.setEndpoint(createUrl({"boards"}));
-                //TODO BOARDS GET
                 return request;
             } else if (vect.size() > 6) {
                 if (vect.at(4) == "board") {

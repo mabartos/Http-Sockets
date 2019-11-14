@@ -10,6 +10,7 @@
 #include <sstream>
 #include <iostream>
 #include <regex>
+#include <netdb.h>
 #include "../common/Errors.h"
 #include "Client.h"
 
@@ -22,7 +23,9 @@ Client::Client(string host, int port, string request) : host(move(host)), port(p
 
 void Client::run() {
     int sock = 0, valRead;
-    struct sockaddr_in address;
+    struct sockaddr_in address{};
+    struct addrinfo hintsHost{};
+    struct addrinfo *hostResults = nullptr;
 
     char buffer[BUFFER_SIZE] = {0};
 
@@ -30,13 +33,33 @@ void Client::run() {
         Errors::error(EXIT_FAILURE, "Socket creation !!");
     }
 
+    memset(&address, 0, sizeof(address));
     // IPv4
     address.sin_family = AF_INET;
     // Port
     address.sin_port = htons(port);
 
-    if (host == "localhost") {
-        host = "127.0.0.1";
+    memset(&hintsHost, 0, sizeof(hintsHost));
+    // TCP
+    hintsHost.ai_socktype = SOCK_STREAM;
+    // IPv4
+    hintsHost.ai_family = AF_INET;
+    // specifies protocol for the returned socket address
+    hintsHost.ai_protocol = 0;
+
+    //TODO define
+    hintsHost.ai_flags |= AI_CANONNAME;
+
+    if (getaddrinfo((this->host).c_str(), nullptr, &hintsHost, &hostResults) != 0) {
+        Errors::error(EXIT_FAILURE, "Invalid Host!!");
+    }
+
+    if (hostResults != nullptr) {
+        struct sockaddr_in *saddr = (struct sockaddr_in *) hostResults->ai_addr;
+        host = inet_ntoa(saddr->sin_addr);
+        freeaddrinfo(hostResults);
+    } else {
+        Errors::error(EXIT_FAILURE, "Cannot find host IP!!");
     }
 
     // Convert IPv4 addresses from text to binary form
@@ -46,6 +69,10 @@ void Client::run() {
 
     if (connect(sock, (struct sockaddr *) &address, sizeof(address)) < 0) {
         Errors::error(EXIT_FAILURE, "Connection failed");
+    }
+
+    if (request.size() >= BUFFER_SIZE) {
+        Errors::error(EXIT_FAILURE, "Request is too long!!");
     }
 
     send(sock, request.c_str(), request.size(), 0);

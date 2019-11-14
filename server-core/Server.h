@@ -22,7 +22,7 @@ private:
     vector<string> getUrl(const string &endpoint);
 
 public:
-    Server(int port);
+    explicit Server(int port);
 
     ~Server() = default;
 
