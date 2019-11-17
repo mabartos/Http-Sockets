@@ -20,12 +20,12 @@ void ClientParser::printHelp() {
     printf("{PORT} is port, where the server listen.\n");
     printf("{COMMAND} might be:\n");
     printf("-----------------------------------------------------------\n");
-    printf("boards\t\t\t\t\t\t\t\tGET /boards\n"
-           "board add <name>\t\t\t\t\tPOST /boards/<name>\n"
-           "board delete <name>\t\t\t\t\tDELETE /boards/<name>\n"
-           "board list <name>\t\t\t\t\tGET /board/<name>\n"
-           "item add <name> <content>\t\t\tPOST /board/<name>\n"
-           "item delete <name> <id>\t\t\t\tDELETE /board/<name>/<id>\n"
+    printf("boards\t\t\t\t\tGET /boards\n"
+           "board add <name>\t\t\tPOST /boards/<name>\n"
+           "board delete <name>\t\t\tDELETE /boards/<name>\n"
+           "board list <name>\t\t\tGET /board/<name>\n"
+           "item add <name> <content>\t\tPOST /board/<name>\n"
+           "item delete <name> <id>\t\t\tDELETE /board/<name>/<id>\n"
            "item update <name> <id> <content>\tPUT /board/<name>/<id>\n");
     printf("-----------------------------------------------------------\n\n");
     printf("Response Headers will be printed to 'STDERR'\n");
