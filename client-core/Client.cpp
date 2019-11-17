@@ -25,14 +25,9 @@ void Client::run() {
     int sock = 0, valRead;
     struct sockaddr_in address{};
     struct addrinfo hintsHost{};
-    struct addrinfo *hostResults = nullptr;
+    struct addrinfo *hostResults = nullptr, *result = nullptr;
 
     char buffer[BUFFER_SIZE] = {0};
-
-    // Create TCP Socket IPv4
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        Errors::error(EXIT_FAILURE, "Socket creation !!");
-    }
 
     memset(&address, 0, sizeof(address));
     // IPv4
@@ -48,30 +43,34 @@ void Client::run() {
     // specifies protocol for the returned socket address
     hintsHost.ai_protocol = 0;
 
-    //TODO define
+    // enable canonical names
     hintsHost.ai_flags |= AI_CANONNAME;
 
     if (getaddrinfo((this->host).c_str(), nullptr, &hintsHost, &hostResults) != 0) {
-        close(sock);
         Errors::error(EXIT_FAILURE, "Invalid Host!!");
     }
 
-    // Get IPv4 address from hostname
-    if (hostResults != nullptr) {
-        struct sockaddr_in *saddr = (struct sockaddr_in *) hostResults->ai_addr;
-        address.sin_addr = saddr->sin_addr;
-        host = inet_ntoa(saddr->sin_addr);
-        // Free all available hosts from memory
-        freeaddrinfo(hostResults);
-    } else {
-        close(sock);
-        Errors::error(EXIT_FAILURE, "Cannot find host IP!!");
-    }
+    for (result = hostResults; result != nullptr; result = hostResults->ai_next) {
+        // Create TCP Socket IPv4
+        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+            Errors::error(EXIT_FAILURE, "Socket creation !!");
+        }
 
-    // Connect to socket
-    if (connect(sock, (struct sockaddr *) &address, sizeof(address)) < 0) {
+        struct sockaddr_in *saddr = (struct sockaddr_in *) result->ai_addr;
+        address.sin_addr = saddr->sin_addr;
+
+        // Trying to connect to address
+        if (connect(sock, (struct sockaddr *) &address, sizeof(address)) != -1) {
+            break;
+        }
+
         close(sock);
-        Errors::error(EXIT_FAILURE, "Connection failed");
+    }
+    freeaddrinfo(hostResults);
+
+    if (result == nullptr) {
+        close(sock);
+        Errors::error(EXIT_FAILURE, "Cannot find address");
     }
 
     // Content cannot be bigger than BUFFER_SIZE

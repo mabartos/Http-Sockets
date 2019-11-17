@@ -28,7 +28,7 @@ void NoticeBoard::addItem(const string &content) {
 }
 
 bool NoticeBoard::changeItemContent(int id, const string &content) {
-    if (id > 0 && id < items.size()) {
+    if (id > 0 && id <= items.size()) {
         items.at(id - 1) = content;
         return true;
     }
@@ -37,7 +37,7 @@ bool NoticeBoard::changeItemContent(int id, const string &content) {
 
 bool NoticeBoard::removeItem(int id) {
     if (id > 0 && id <= items.size()) {
-        items.erase(items.begin() + id-1);
+        items.erase(items.begin() + id - 1);
         return true;
     }
     return false;

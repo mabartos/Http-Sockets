@@ -26,7 +26,11 @@ default: $(ISA_CLIENT)  $(ISA_SERVER)
 all: default
 
 clean:
-	$(RM) *.o *~ $(ISA_SERVER) $(ISA_CLIENT)
+	$(RM) *.o *~ *.gch $(ISA_SERVER) $(ISA_CLIENT)
+	cd common/ && $(RM) *.o *~ *.gch
+	cd server-core/ && $(RM) *.o *~ *.gch
+	cd server-core/board && $(RM) *.o *~ *.gch
+	cd client-core/ && $(RM) *.o *~ *.gch
 
 
 
